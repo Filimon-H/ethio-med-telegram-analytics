@@ -1,1 +1,5 @@
 .venv  
+.env
+data
+logs
+telegram_scraper_session.session 
