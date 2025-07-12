@@ -9,3 +9,7 @@ dbt_project/dbt_packages/
 .idea/
 *.sqlite3
 pgdata/
+
+dbt_packages/
+target/
+logs/
