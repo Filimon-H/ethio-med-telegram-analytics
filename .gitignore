@@ -1,6 +1,11 @@
 .venv  
 .env
-data
+
+
+data/raw/*
+!data/raw/.gitkeep
+!data/raw.dvc
+
 logs
 telegram_scraper_session.session 
 dbt_project/target/
