@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: dim_channels
+    description: "Unique list of Telegram channels"
+    columns:
+      - name: channel_name
+        description: "Channel name"
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_dates
+    description: "Calendar dimension table"
+    columns:
+      - name: calendar_date
+        description: "Date representing the calendar day"
+        tests:
+          - unique
+          - not_null
+
+  - name: fct_messages
+    description: "Fact table of Telegram messages"
+    columns:
+      - name: message_id
+        description: "Unique ID of the Telegram message"
+        tests:
+          - not_null
+          - unique
+      - name: message_date
+        description: "Date the message was sent"
+        tests:
+          - not_null
