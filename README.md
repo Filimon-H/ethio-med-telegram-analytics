@@ -1,110 +1,164 @@
-# ETHIO-MED-TELEGRAM-ANALYTICS
 
-A containerized, end-to-end data pipeline and analytics solution designed to ingest, store, transform, and prepare Telegram data (messages and media) for downstream Natural Language Processing (NER) and image-based object detection (YOLOv8) tasks.
+# 🌐 Ethio-Med Telegram Analytics
 
----
-
-## 🧠 Overview
-
-This project focuses on scraping Amharic Telegram messages from medical-related channels, loading them into a PostgreSQL database, transforming the data using dbt into a clean and analytics-ready star schema, and preparing it for downstream machine learning and computer vision tasks.
+A fully containerized ELT data pipeline that scrapes Telegram messages from Ethiopian health-related channels, loads them into PostgreSQL, transforms the raw data into a star schema using dbt, and prepares it for downstream media enrichment and analytics.
 
 ---
 
-## 🗂️ Project Structure
+## ✨ Features
 
-```
-├── data/                        # Raw and preprocessed data (JSON, media)
-│   ├── raw/                    # Source files from Telegram
-│   └── preprocessed/          # Cleaned CSV/JSON
-├── dbt_project/                # DBT models and configs
-├── scripts/                    # Python scripts for ETL
-├── notebooks/                  # EDA and debugging notebooks
-├── .env                        # Environment variables
-├── docker-compose.yml          # Multi-container setup
-├── requirements.txt            # Python dependencies
-└── README.md                   # Project description (this file)
-```
+* ✈ Automated data scraping with Telethon
+* 📂 PostgreSQL for raw and transformed data storage
+* 🌐 dbt for transformation and star schema modeling
+* 🏃 Dockerized for reproducibility and ease of setup
+* 🔍 Supports YOLOv8 image enrichment (future step)
 
 ---
 
-## ⚙️ Technologies Used
+## 🔧 Setup Instructions
 
-* **Python 3.10**
-* **PostgreSQL 14**
-* **Docker & Docker Compose**
-* **DBT (Data Build Tool)**
-* **pgAdmin 4**
-* **Telethon** – Telegram scraping
-* **YOLOv8** – Image classification (upcoming)
-
----
-
-## 🚀 Setup Instructions
+### 1. Clone the Repo
 
 ```bash
-# 1. Clone the repository
-$ git clone https://github.com/yourusername/ETHIO-MED-TELEGRAM-ANALYTICS.git
-$ cd ETHIO-MED-TELEGRAM-ANALYTICS
+git clone https://github.com/yourusername/ethio-med-telegram-analytics.git
+cd ethio-med-telegram-analytics
+```
 
-# 2. Add environment variables
-$ cp .env.example .env
+### 2. Define Environment Variables
 
-# 3. Build and run containers
-$ docker compose up --build
+Create a `.env` file in the root directory:
 
-# 4. Load raw messages into PostgreSQL
-$ python scripts/load_raw_json.py
+```ini
+PGUSER=
+PGPASSWORD=
+PGDATABASE=
+PGHOST=
+PGPORT=
+```
 
-# 5. Initialize and run DBT transformations
-$ docker exec -w /app/telegram_dbt_project -it telegram_app dbt build
+> ⚠️ `.env` is in `.gitignore`. Copy the template `.env.example` if needed.
 
-# 6. Generate DBT docs
-$ docker exec -w /app/telegram_dbt_project -it telegram_app dbt docs generate
-$ docker exec -w /app/telegram_dbt_project -it telegram_app dbt docs serve
+### 3. Build and Start Containers
+
+```bash
+docker-compose up --build
+```
+
+This sets up:
+
+* `telegram_db`: PostgreSQL container
+* `telegram_app`: Python + dbt container (idle for script execution)
+
+---
+
+## 🚀 Data Scraping (Task 1)
+
+1. Activate virtual environment (for local testing):
+
+```bash
+python -m venv .venv
+source .venv/bin/activate  # or .venv\Scripts\activate on Windows
+```
+
+2. Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+3. Run scraper:
+
+```bash
+python scripts/scrape_telegram.py
+```
+
+This saves raw messages as JSON to:
+
+```plaintext
+data/raw/telegram_messages/YYYY-MM-DD/*.json
+```
+
+4. Load into PostgreSQL:
+
+```bash
+python scripts/load_raw_to_postgres.py
+```
+
+This loads messages into the `raw.telegram_messages` table.
+
+---
+
+## 📊 DBT Transformation (Task 2)
+
+### 1. Initialize and Configure dbt (already done)
+
+Check `telegram_dbt_project` for DBT project files.
+
+### 2. Run Transformations
+
+From the Docker container:
+
+```bash
+docker exec -w /app/telegram_dbt_project -it telegram_app dbt build
+```
+
+This builds:
+
+* `stg_telegram_messages` (view)
+* `dim_channels`, `dim_dates`, `fct_messages` (tables)
+
+### 3. Run Custom Tests
+
+```bash
+dbt test
+```
+
+Includes:
+
+* Built-in tests (`not_null`, `unique`)
+* Custom test: `test_message_has_text_or_media.sql`
+
+### 4. View Documentation
+
+```bash
+dbt docs generate
+```
+
+Then serve locally:
+
+```bash
+dbt docs serve
 ```
 
 ---
 
-## ✅ Features Completed
+## 📚 Project Structure
 
-* ✅ Telegram message scraping with Telethon
-* ✅ PostgreSQL + pgAdmin in Docker
-* ✅ Raw data loader to PostgreSQL
-* ✅ dbt staging and data mart models (star schema)
-* ✅ dbt tests (not\_null, unique, custom)
-* ✅ dbt documentation
-* 🚧 Task 3: NER & YOLOv8 processing pipeline (ongoing)
-
----
-
-## 🔍 Data Warehouse Design
-
-* **Schema: raw** – Loaded JSON messages
-* **Schema: analytics** – Star schema models
-
-  * `stg_telegram_messages` (view)
-  * `dim_channels`, `dim_dates`, `fct_messages` (tables)
-
----
-
-## 🧪 Testing & Documentation
-
-* Built-in DBT tests for primary keys and nulls
-* One custom test: `test_message_has_text_or_media`
-* Auto-generated documentation with `dbt docs`
+```bash
+ethio-med-telegram-analytics/
+├── data/
+│   └── raw/telegram_messages/YYYY-MM-DD/*.json
+├── scripts/
+│   ├── scrape_telegram.py
+│   └── load_raw_to_postgres.py
+├── telegram_dbt_project/
+│   ├── models/staging/
+│   ├── models/marts/
+│   └── dbt_project.yml
+├── docker-compose.yml
+├── Dockerfile
+├── requirements.txt
+├── .env
+└── README.md
+```
 
 ---
 
-## 👤 Author
+## 🚀 Next Steps
 
-**Filimon Hailemariam**
-📧 LinkedIn | GitHub | Portfolio
-
----
-
-## 🗒️ License
-
-MIT License (optional if public)
+* 🚀 Task 3: Use YOLOv8 to enrich images with object detection
+* ⚙️ Task 4: Build a FastAPI service to query enriched data
+* ⏳ Task 5: Orchestrate with Dagster for full automation
 
 ---
 
