@@ -6,10 +6,10 @@ A containerized, end-to-end data pipeline and analytics solution designed to ing
 
 ## 🧠 Project Overview
 
-This project scrapes Amharic Telegram messages from Ethiopian health-related channels and builds a scalable ELT (Extract, Load, Transform) pipeline using Docker, PostgreSQL, and dbt. It prepares clean, structured data for downstream machine learning tasks including:
+This project scrapes Amharic Telegram messages from Ethiopian health-related channels and builds a scalable **ELT (Extract, Load, Transform)** pipeline using Docker, PostgreSQL, and **dbt**. It prepares clean, structured data for downstream machine learning tasks including:
 
-* Named Entity Recognition (NER)
-* YOLOv8-based image object detection
+- Named Entity Recognition (NER)
+- YOLOv8-based image object detection
 
 ---
 
@@ -19,7 +19,7 @@ This project scrapes Amharic Telegram messages from Ethiopian health-related cha
 ├── data/                      # Telegram JSON and media files
 │   ├── raw/                  # Raw Telegram message files
 │   └── preprocessed/        # Cleaned data (JSON/CSV)
-├── dbt_project/              # dbt models and configurations
+├── telegram_dbt_project/     # dbt models and configurations
 ├── scripts/                  # Python scripts for data loading
 ├── notebooks/                # EDA and analysis notebooks
 ├── .env                      # Environment variables (excluded from Git)
@@ -32,13 +32,13 @@ This project scrapes Amharic Telegram messages from Ethiopian health-related cha
 
 ## ⚙️ Technologies Used
 
-* Python 3.10
-* PostgreSQL 14
-* Docker & Docker Compose
-* dbt (Data Build Tool)
-* pgAdmin 4
-* Telethon (Telegram scraping)
-* YOLOv8 (image classification — upcoming)
+- Python 3.10
+- PostgreSQL 14
+- Docker & Docker Compose
+- **dbt (Data Build Tool)**
+- pgAdmin 4
+- Telethon (Telegram scraping)
+- YOLOv8 (image classification — upcoming)
 
 ---
 
@@ -76,13 +76,35 @@ python scripts/scrape_telegram.py --channel @cheMed123 --limit 1000
 python scripts/load_raw_json.py --input data/raw/telegram_messages/YYYY-MM-DD/
 ```
 
-### 6. Initialize and Run dbt Transformations
+---
+
+## 🔄 dbt Implementation Overview
+
+This project includes a fully functional **dbt transformation layer**, configured and run inside Docker to convert raw Telegram data into a structured, analytics-ready star schema.
+
+### ✅ dbt Features Implemented
+
+- **Initialized** with `dbt init telegram_dbt_project`
+- **Profile** connected to Docker-based PostgreSQL
+- **Staging models**: `stg_telegram_messages` (cleaned raw data)
+- **Mart models**:
+  - `dim_channels`: unique channels
+  - `dim_dates`: calendar dates
+  - `fct_messages`: message-level metrics
+- **Materialization strategy**:
+  - Views for staging models
+  - Tables for marts
+- **Generic tests**: `not_null`, `unique`
+- **Custom test**: `test_message_has_text_or_media.sql`
+- **Documentation**: `dbt docs generate && dbt docs serve`
+
+📌 Run dbt inside Docker:
 
 ```bash
 docker exec -w /app/telegram_dbt_project -it telegram_app dbt build
 ```
 
-### 7. Launch dbt Docs
+📌 Launch dbt Docs:
 
 ```bash
 docker exec -w /app/telegram_dbt_project -it telegram_app dbt docs generate
@@ -93,60 +115,59 @@ docker exec -w /app/telegram_dbt_project -it telegram_app dbt docs serve
 
 ## ✅ Completed Tasks
 
-* [x] Dockerized PostgreSQL + pgAdmin + Python app
-* [x] Telegram message scraping via Telethon
-* [x] Raw JSON loader to PostgreSQL (schema: `raw.telegram_messages`)
-* [x] dbt transformations with:
-
-  * Staging layer (`stg_telegram_messages`) as views
-  * Mart layer with fact and dimension tables: `fct_messages`, `dim_channels`, `dim_dates`
-* [x] dbt tests: `unique`, `not_null`, and 1 custom test
-* [x] dbt docs: DAG and model documentation
+- [x] Dockerized PostgreSQL + pgAdmin + Python app
+- [x] Telegram message scraping via Telethon
+- [x] Raw JSON loader to PostgreSQL (`raw.telegram_messages`)
+- [x] dbt transformations:
+  - `stg_telegram_messages` (View)
+  - `dim_channels`, `dim_dates`, `fct_messages` (Tables)
+- [x] dbt tests: `unique`, `not_null`, custom business rule
+- [x] dbt docs with DAG and model definitions
 
 ---
 
 ## 📦 Data Warehouse Design
 
-* **Schema: raw** – Directly ingested raw Telegram messages
-* **Schema: analytics** – Star schema:
+- **Schema: raw** – Ingested raw Telegram messages
+- **Schema: analytics** – Star schema:
 
-  * `stg_telegram_messages` (View)
-  * `dim_channels` (Table)
-  * `dim_dates` (Table)
-  * `fct_messages` (Table)
+  - `stg_telegram_messages` (View)
+  - `dim_channels`, `dim_dates`, `fct_messages` (Tables)
 
 ---
 
 ## 🧪 Testing & Quality Checks
 
-* **Generic Tests**: `not_null`, `unique`
-* **Custom Tests**:
-
-  * `test_message_has_text_or_media.sql`: ensures messages are not blank
-* **Docs**: `dbt docs generate` provides visual model DAG
+- ✅ Generic tests: `not_null`, `unique`
+- ✅ Custom test: `test_message_has_text_or_media`
+- ✅ Docs: auto-generated lineage with `dbt docs generate`
 
 ---
 
 ## 🧠 Engineering Decisions
 
-* **dbt** is used to modularize transformations and enforce version-controlled analytics
-* **ELT Pattern**: Raw data is loaded first, then transformed
-* **Views** for staging to save space
-* **Tables** for marts for performance in joins and analysis
+- Followed **ELT** pattern: raw → staging → marts
+- Used **dbt** for modular, testable SQL pipelines
+- Used **views** for staging to optimize storage
+- Used **tables** for marts to enable faster joins
 
 ---
 
 ## 📌 Next Steps
 
-* Task 3: YOLOv8 Image Enrichment
-* Task 4: FastAPI serving of analytics
-* Task 5: Orchestrate with Dagster
+- [ ] Task 3: YOLOv8 Image Enrichment
+- [ ] Task 4: FastAPI analytics API
+- [ ] Task 5: Orchestrate with Dagster
 
 ---
 
 ## 👤 Author
 
-**Filimon Hailemariam**
+**Filimon Hailemariam**  
 📧 [LinkedIn](https://linkedin.com/in/filimon-hailemariam) • [GitHub](https://github.com/filimon-hailemariam)
 
 ---
+
+## 🗒️ License
+
+MIT License (optional)
