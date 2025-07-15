@@ -1,173 +1,158 @@
-# ETHIO-MED-TELEGRAM-ANALYTICS
+# ETHIO-MED-TELEGRAM-ANALYTICS 📦🇪🇹
 
-A containerized, end-to-end data pipeline and analytics solution designed to ingest, store, transform, and prepare Telegram data (messages and media) for downstream Natural Language Processing (NER) and image-based object detection (YOLOv8) tasks.
+A containerized, end-to-end data analytics platform that ingests, stores, transforms, and prepares Ethiopian medical Telegram data (messages and media) for downstream NLP and CV tasks including Named Entity Recognition (NER) and YOLOv8 image detection.
 
 ---
 
 ## 🧠 Project Overview
 
-This project scrapes Amharic Telegram messages from Ethiopian health-related channels and builds a scalable **ELT (Extract, Load, Transform)** pipeline using Docker, PostgreSQL, and **dbt**. It prepares clean, structured data for downstream machine learning tasks including:
+This project builds a robust **ELT data pipeline** using open-source tools like Docker, PostgreSQL, dbt, and Dagster. It scrapes Amharic Telegram messages from Ethiopian medical channels and processes them for use in:
 
-- Named Entity Recognition (NER)
-- YOLOv8-based image object detection
-
----
-
-## 🗂️ Project Structure
-
-```
-├── data/                      # Telegram JSON and media files
-│   ├── raw/                  # Raw Telegram message files
-│   └── preprocessed/        # Cleaned data (JSON/CSV)
-├── telegram_dbt_project/     # dbt models and configurations
-├── scripts/                  # Python scripts for data loading
-├── notebooks/                # EDA and analysis notebooks
-├── .env                      # Environment variables (excluded from Git)
-├── docker-compose.yml        # Multi-container Docker setup
-├── requirements.txt          # Python dependencies
-└── README.md                 # Project overview and usage
-```
+- Named Entity Recognition (NER) on Amharic text
+- YOLOv8-based medical object detection on images
+- Business-focused analytics API powered by FastAPI
 
 ---
 
-## ⚙️ Technologies Used
+## 🔧 Tech Stack
 
-- Python 3.10
-- PostgreSQL 14
-- Docker & Docker Compose
-- **dbt (Data Build Tool)**
-- pgAdmin 4
-- Telethon (Telegram scraping)
-- YOLOv8 (image classification — upcoming)
+| Layer             | Tool                          |
+|------------------|-------------------------------|
+| 🐘 Database       | PostgreSQL 14 + pgAdmin       |
+| 🧱 Transformations | dbt (Data Build Tool)         |
+| 📤 Ingestion      | Telethon + Custom Python      |
+| 🔍 Analysis API   | FastAPI + Pydantic            |
+| 🧠 CV/NLP         | YOLOv8, HuggingFace Transformers |
+| ⚙️ Orchestration  | Dagster                       |
+| 🐳 Infrastructure | Docker + Docker Compose       |
 
 ---
 
-## 🚀 Setup Instructions
+## 📁 Directory Structure
 
-### 1. Clone the Repository
+├── data/ # Telegram raw and processed data
+│ ├── raw/ # Raw Telegram JSONs
+│ └── preprocessed/ # Cleaned CSV/JSON
+├── ethio_api/ # FastAPI application
+├── ethio_pipeline/ # Dagster jobs and repository
+├── telegram_dbt_project/ # dbt models and configs
+├── scripts/ # Data scraping and loading scripts
+├── notebooks/ # EDA and ML experiments
+├── .env # Environment secrets (excluded)
+├── docker-compose.yml # Multi-container setup
+├── requirements.txt # Project dependencies
+└── README.md # You are here
+
+
+
+---
+
+## 🚀 Quickstart Guide
+
+### 1. Clone and Configure
 
 ```bash
-git clone https://github.com/yourusername/ETHIO-MED-TELEGRAM-ANALYTICS.git
+git clone https://github.com/filimon-hailemariam/ETHIO-MED-TELEGRAM-ANALYTICS.git
 cd ETHIO-MED-TELEGRAM-ANALYTICS
-```
-
-### 2. Configure Environment Variables
-
-```bash
 cp .env.example .env
-# Edit the .env file to match your local DB credentials
-```
+📝 Edit .env with your PostgreSQL and Telegram credentials.
 
-### 3. Start Docker Containers
-
-```bash
+2. Start Dockerized Environment
+bash
+Copy
+Edit
 docker compose up --build
-```
-
-### 4. Scrape Telegram Data (Example)
-
-```bash
+3. Scrape Telegram Messages
+bash
+Copy
+Edit
 python scripts/scrape_telegram.py --channel @cheMed123 --limit 1000
-```
-
-### 5. Load Raw Data into PostgreSQL
-
-```bash
+4. Load Raw JSON into PostgreSQL
+bash
+Copy
+Edit
 python scripts/load_raw_json.py --input data/raw/telegram_messages/YYYY-MM-DD/
-```
-
----
-
-## 🔄 dbt Implementation Overview
-
-This project includes a fully functional **dbt transformation layer**, configured and run inside Docker to convert raw Telegram data into a structured, analytics-ready star schema.
-
-### ✅ dbt Features Implemented
-
-- **Initialized** with `dbt init telegram_dbt_project`
-- **Profile** connected to Docker-based PostgreSQL
-- **Staging models**: `stg_telegram_messages` (cleaned raw data)
-- **Mart models**:
-  - `dim_channels`: unique channels
-  - `dim_dates`: calendar dates
-  - `fct_messages`: message-level metrics
-- **Materialization strategy**:
-  - Views for staging models
-  - Tables for marts
-- **Generic tests**: `not_null`, `unique`
-- **Custom test**: `test_message_has_text_or_media.sql`
-- **Documentation**: `dbt docs generate && dbt docs serve`
-
-📌 Run dbt inside Docker:
-
-```bash
+5. Run dbt Transformations
+bash
+Copy
+Edit
 docker exec -w /app/telegram_dbt_project -it telegram_app dbt build
-```
-
-📌 Launch dbt Docs:
-
-```bash
+6. Serve dbt Documentation (Optional)
+bash
+Copy
+Edit
 docker exec -w /app/telegram_dbt_project -it telegram_app dbt docs generate
 docker exec -w /app/telegram_dbt_project -it telegram_app dbt docs serve
-```
+7. Run FastAPI Server
+bash
+Copy
+Edit
+uvicorn ethio_api.main:app --reload
+8. Launch Dagster UI for Orchestration
+bash
+Copy
+Edit
+dagster dev -f ethio_pipeline/repository.py
+🧱 dbt Data Warehouse Design
+Schema	Table/View	Purpose
+raw	telegram_messages	Raw ingested JSON
+analytics	stg_telegram_messages	Cleaned message view
+analytics	dim_channels	Channel dimension
+analytics	dim_dates	Date dimension
+analytics	fct_messages	Fact table with metrics
 
----
+✅ Tests: not_null, unique, custom
+✅ Documentation: auto-generated via dbt docs
 
-## ✅ Completed Tasks
+✅ Completed Tasks
+Task 1: Ingestion
+ Telethon-based Telegram message scraper
 
-- [x] Dockerized PostgreSQL + pgAdmin + Python app
-- [x] Telegram message scraping via Telethon
-- [x] Raw JSON loader to PostgreSQL (`raw.telegram_messages`)
-- [x] dbt transformations:
-  - `stg_telegram_messages` (View)
-  - `dim_channels`, `dim_dates`, `fct_messages` (Tables)
-- [x] dbt tests: `unique`, `not_null`, custom business rule
-- [x] dbt docs with DAG and model definitions
+Task 2: Data Loading & Modeling
+ Raw loader into PostgreSQL
 
----
+ dbt project setup and staging
 
-## 📦 Data Warehouse Design
+ Star schema: fct_messages, dim_channels, dim_dates
 
-- **Schema: raw** – Ingested raw Telegram messages
-- **Schema: analytics** – Star schema:
+ dbt testing and documentation
 
-  - `stg_telegram_messages` (View)
-  - `dim_channels`, `dim_dates`, `fct_messages` (Tables)
+Task 3: Image Enrichment (YOLOv8)
+ YOLOv8 integration with media files
 
----
+ Object annotation and metadata storage
 
-## 🧪 Testing & Quality Checks
+Task 4: Analytical API (FastAPI)
+ /api/reports/top-products
 
-- ✅ Generic tests: `not_null`, `unique`
-- ✅ Custom test: `test_message_has_text_or_media`
-- ✅ Docs: auto-generated lineage with `dbt docs generate`
+ /api/channels/{channel_name}/activity
 
----
+ /api/search/messages?query=keyword
 
-## 🧠 Engineering Decisions
+ Pydantic schemas for response validation
 
-- Followed **ELT** pattern: raw → staging → marts
-- Used **dbt** for modular, testable SQL pipelines
-- Used **views** for staging to optimize storage
-- Used **tables** for marts to enable faster joins
+Task 5: Orchestration (Dagster)
+ Dagster pipeline setup for ELT orchestration
 
----
+ Schedule + retry logic
 
-## 📌 Next Steps
+ Local dev server with dagster dev
 
-- [ ] Task 3: YOLOv8 Image Enrichment
-- [ ] Task 4: FastAPI analytics API
-- [ ] Task 5: Orchestrate with Dagster
+📌 Next Steps
+ Automate Telegram scraping on schedule
 
----
+ Model fine-tuning for NER + YOLO
 
-## 👤 Author
+ Model-serving APIs for ML outputs
 
-**Filimon Hailemariam**  
-📧 [LinkedIn](https://linkedin.com/in/filimon-hailemariam) • [GitHub](https://github.com/filimon-hailemariam)
+ Cloud deployment (GCP/AWS)
 
----
 
-## 🗒️ License
+📜 License
+MIT License 
 
-MIT License (optional)
+👨‍💻 Author
+Filimon Hailemariam
+📍 Addis Ababa, Ethiopia
+🔗 GitHub | LinkedIn
+
