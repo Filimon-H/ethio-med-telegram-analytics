@@ -43,55 +43,35 @@ This project builds a robust **ELT data pipeline** using open-source tools like 
 ├── requirements.txt # Project dependencies
 └── README.md # You are here
 
-
+yaml
+Copy
+Edit
 
 ---
 
 ## 🚀 Quickstart Guide
 
 ### 1. Clone and Configure
-
-```bash
 git clone https://github.com/filimon-hailemariam/ETHIO-MED-TELEGRAM-ANALYTICS.git
 cd ETHIO-MED-TELEGRAM-ANALYTICS
 cp .env.example .env
 📝 Edit .env with your PostgreSQL and Telegram credentials.
 
 2. Start Dockerized Environment
-bash
-Copy
-Edit
 docker compose up --build
 3. Scrape Telegram Messages
-bash
-Copy
-Edit
 python scripts/scrape_telegram.py --channel @cheMed123 --limit 1000
 4. Load Raw JSON into PostgreSQL
-bash
-Copy
-Edit
 python scripts/load_raw_json.py --input data/raw/telegram_messages/YYYY-MM-DD/
 5. Run dbt Transformations
-bash
-Copy
-Edit
 docker exec -w /app/telegram_dbt_project -it telegram_app dbt build
 6. Serve dbt Documentation (Optional)
-bash
-Copy
-Edit
 docker exec -w /app/telegram_dbt_project -it telegram_app dbt docs generate
 docker exec -w /app/telegram_dbt_project -it telegram_app dbt docs serve
 7. Run FastAPI Server
-bash
-Copy
-Edit
+
 uvicorn ethio_api.main:app --reload
 8. Launch Dagster UI for Orchestration
-bash
-Copy
-Edit
 dagster dev -f ethio_pipeline/repository.py
 🧱 dbt Data Warehouse Design
 Schema	Table/View	Purpose
@@ -149,10 +129,9 @@ Task 5: Orchestration (Dagster)
 
 
 📜 License
-MIT License 
+MIT License — use freely, cite when needed.
 
 👨‍💻 Author
 Filimon Hailemariam
 📍 Addis Ababa, Ethiopia
 🔗 GitHub | LinkedIn
-
