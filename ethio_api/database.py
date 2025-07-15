@@ -1,13 +1,17 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-import os
 from dotenv import load_dotenv
+import os
 
-load_dotenv(".env", override=True)
-DB_URL = os.getenv("POSTGRES_URL")
+# Load .env file
+load_dotenv()
 
-if not DB_URL:
-    raise ValueError("❌ POSTGRES_URL is not set in the .env file.")
+# Read from environment
+DATABASE_URL = os.getenv("DATABASE_URL")
+print("📦 Loaded DB URL:", DATABASE_URL)
 
-engine = create_engine(DB_URL)
-session_local = sessionmaker(bind=engine)
+# Create engine
+engine = create_engine(DATABASE_URL)
+
+# ✅ THIS must be defined with the exact name:
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

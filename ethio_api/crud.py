@@ -1,17 +1,46 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import text
 from ethio_api.schemas import ProductReport, ChannelActivity, MessageSearch
+from fastapi import HTTPException
+from ethio_api.database import SessionLocal
+
+#def get_top_products(db: Session, limit: int = 10):
+   # rows = db.execute(text("""
+       # SELECT message AS product_name, COUNT(*) AS mention_count
+       # FROM analytics.fct_messages
+        #GROUP BY message
+       # ORDER BY mention_count DESC
+      #  LIMIT :limit
+   # """), {"limit": limit}).fetchall()
+    
+   # return [ProductReport(product_name=row[0], mention_count=row[1]) for row in rows]
+
+#from fastapi import HTTPException
 
 def get_top_products(db: Session, limit: int = 10):
-    rows = db.execute(text("""
-        SELECT message AS product_name, COUNT(*) AS mention_count
-        FROM analytics_analytics.fct_messages
-        GROUP BY message
-        ORDER BY mention_count DESC
-        LIMIT :limit
-    """), {"limit": limit}).fetchall()
-    
-    return [ProductReport(product_name=row[0], mention_count=row[1]) for row in rows]
+    try:
+        rows = db.execute(text("""
+            SELECT 
+                message AS product_name, 
+                COUNT(*) AS mention_count
+            FROM analytics_analytics.fct_messages
+            WHERE message IS NOT NULL
+            GROUP BY message
+            ORDER BY mention_count DESC
+            LIMIT :limit
+        """), {"limit": limit}).fetchall()
+        print("🟢 DB Results:", rows)
+
+        return [
+            ProductReport(product_name=row[0], mention_count=row[1])
+            for row in rows
+        ]
+
+    except Exception as e:
+        print("🔥 ERROR:", e)
+        raise HTTPException(status_code=500, detail="Database query failed")
+
+
 
 def get_channel_activity(db: Session, channel_name: str):
     row = db.execute(text(f"""
@@ -24,7 +53,7 @@ def get_channel_activity(db: Session, channel_name: str):
     """)).fetchone()
     return ChannelActivity(channel_name=row[0], daily_post_count=row[1], weekly_post_count=row[2])
 
-def search_messages(db: Session, query: str):
+#def search_messages(db: Session, query: str):
     rows = db.execute(text("""
         SELECT message_id, message, channel_name, message_date
         FROM analytics_analytics.fct_messages
@@ -41,4 +70,17 @@ def search_messages(db: Session, query: str):
         )
         for row in rows
     ]
+
+def search_messages(db: Session, query: str):
+    result = db.execute(text("""
+        SELECT message_id, message, channel_name, message_date
+        FROM analytics_analytics.fct_messages
+        WHERE message ILIKE :query
+        LIMIT 50
+    """), {"query": f"%{query}%"}).fetchall()
+
+    # Convert each row to a dict
+    return [dict(row._mapping) for row in result]
+
+
 

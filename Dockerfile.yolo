@@ -1,0 +1,13 @@
+FROM python:3.10
+
+WORKDIR /app
+
+COPY . .
+
+# Install base dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# YOLO-specific packages
+RUN pip install ultralytics opencv-python-headless
+
+CMD ["python", "scripts/YOLO_V2.py"]
